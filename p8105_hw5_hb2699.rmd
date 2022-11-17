@@ -25,3 +25,42 @@ The raw dataset collects data on homicides in 50 large U.S. cities. It has `r nr
 
 
 Then we create a `city_state` variable and a `resolved` variable to indicate whether the homicides were solved. There was one observation was mis-recorded as "Tulsa, AL" and we plan to drop it since Tulsa is the city in the state of Oklahoma rather than Alabama.
+
+```{r}
+homicide_tidy = homicide %>%
+  mutate(city_state = str_c(city, state, sep = ", "),
+         resolved= case_when(disposition == "Closed by arrest" ~ "solved",
+                                disposition == "Closed without arrest" ~ "unsolved",
+                                disposition == "Open/No arrest" ~ "unsolved")) %>% 
+  select(city_state, everything()) %>%
+  filter(city_state != "Tulsa, AL")
+```
+
+Then summarize within cities to obtain the total number of homicides and the number of unsolved homicides.
+```{r}
+city_summary = homicide_tidy %>%
+  group_by(city_state) %>%
+  summarise(num_homicides = n(),
+            num_unsolved_homicides = sum(resolved == "unsolved")) 
+city_summary 
+```
+
+This is an estimation of the proportion of homicides that are unsolved in Baltimore, MD.
+```{r}
+bal_test = prop.test(
+  x = city_summary %>% filter(city_state == "Baltimore, MD") %>% pull(num_unsolved_homicides), 
+  n = city_summary %>% filter(city_state == "Baltimore, MD") %>% pull(num_homicides)
+  ) 
+bal_test %>% broom::tidy()
+# the estimated proportion
+est_prop = bal_test %>% broom::tidy() %>%
+  pull(estimate) %>%
+  round(digit = 3)
+# the confidence interval
+conf_low = bal_test %>% broom::tidy() %>%
+  pull(conf.low) %>%
+  round(digit = 3)
+conf_high = bal_test %>% broom::tidy() %>%
+  pull(conf.high) %>%
+  round(digit = 3)
+```
