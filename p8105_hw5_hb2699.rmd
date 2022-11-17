@@ -21,3 +21,7 @@ Import the dataset
 data_url = "https://raw.githubusercontent.com/washingtonpost/data-homicides/master/homicide-data.csv"
 homicide = read_csv(url(data_url)) 
 ```
+The raw dataset collects data on homicides in 50 large U.S. cities. It has `r nrow(homicide)` observations of homicides and `r ncol(homicide)` key variables representing uid, reported date, victims' last name, first name, race, age, sex, city, state, latitude, longitude, and disposition.
+
+
+Then we create a `city_state` variable and a `resolved` variable to indicate whether the homicides were solved. There was one observation was mis-recorded as "Tulsa, AL" and we plan to drop it since Tulsa is the city in the state of Oklahoma rather than Alabama.
