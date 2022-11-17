@@ -64,3 +64,32 @@ conf_high = bal_test %>% broom::tidy() %>%
   pull(conf.high) %>%
   round(digit = 3)
 ```
+The estimated proportion of unsolved homicides in Baltimore, MD is `r est_prop` and the confidence interval is `r paste("[", conf_low, ", ", conf_high, "]", sep ="")`.
+
+
+We will run proportion test for each of the cities in the dataset.
+```{r, warning=FALSE, message=FALSE}
+cities_test = 
+  city_summary %>% 
+  mutate(prop_test = map2(.x = num_unsolved_homicides, .y = num_homicides, ~prop.test(x = .x, n = .y)),
+         tidy_test = map(.x = prop_test, ~broom::tidy(.x))) %>% 
+  select(city_state, tidy_test) %>% 
+  unnest(tidy_test) %>% 
+  select(city_state, estimate, conf.low, conf.high)
+cities_test
+```
+
+Here is a plot that shows the estimates and confidence intervals for each city.
+```{r}
+cities_test %>%
+  mutate(city_state = fct_reorder(city_state, estimate)) %>%
+  ggplot(aes(x = city_state, y = estimate)) +
+  geom_point() +
+  geom_errorbar(aes(ymin = conf.low, ymax = conf.high)) +
+  labs(x = "City",
+       y = "Estimate",
+       title = "Estimates and Confidence Intervals of Porportion of Unsolved Homicides for Each City") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  theme(plot.title = element_text(size = 12))
+```
+
