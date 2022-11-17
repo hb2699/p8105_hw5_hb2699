@@ -14,3 +14,10 @@ library(rvest)
 theme_set(theme_minimal() + theme(legend.position = "bottom"))
 ```
 
+### Problem 2
+
+Import the dataset
+```{r, message=FALSE}
+data_url = "https://raw.githubusercontent.com/washingtonpost/data-homicides/master/homicide-data.csv"
+homicide = read_csv(url(data_url)) 
+```
