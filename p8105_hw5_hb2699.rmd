@@ -124,3 +124,46 @@ sim_results_df =
   unnest(estimate_dfs)
 ```
 
+Here is a plot showing the proportion of times the null is rejected (the power of the test) on the $y$ axis and the true value of $\mu$ on the $x$ axis.
+```{r}
+sim_results_df %>%
+  group_by(true_mean) %>%
+  summarise(
+    count = n(),
+    rej_num = sum(p_val < 0.05),
+    rej_prop = rej_num/count
+  ) %>%
+  ggplot(aes(x = true_mean, y = rej_prop)) +
+  geom_point() +
+  geom_line() + 
+  geom_text(aes(label = round(rej_prop, 3)), vjust = -1, size = 3) + 
+  scale_x_continuous(n.breaks = 10) +
+  scale_y_continuous(n.breaks = 6) +
+  labs(
+    title = "Association Between Effect Size and Power",
+    x = "True Mean",
+    y = "Power of Test"
+  )
+```
+
+From the line plot, we can see that with the increase of the difference between true mean and 0 (effect size), the proportion of times the null is rejected presents a overall increase trend. It increases sharply at first, and then the increase trend slows down as the proportion closer to 1. Generally speaking, there is a positive association between the effect size and power of the test, which means the larger the effect size, the greater the power.
+
+Next is a plot showing the average estimate of $\mu$ on the $y$ axis and the true value of $\mu$ on the $x$ axis.
+```{r}
+sim_results_df %>%
+  group_by(true_mean) %>%
+  summarise(
+    avg_mu_hat = mean(mu_hat)
+  ) %>%
+  ggplot(aes(x = true_mean, y = avg_mu_hat)) +
+  geom_point() +
+  geom_line() + 
+  geom_text(aes(label = round(avg_mu_hat, 3)), vjust = -1, size = 3) + 
+  scale_x_continuous(n.breaks = 6) +
+  scale_y_continuous(n.breaks = 6) +
+  labs(
+    title = "Association Between True Mean and Average Estimate of Mean",
+    x = "True Mean",
+    y = "Average Estimate of Mean"
+  )
+```
